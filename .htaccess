@@ -1,0 +1,15 @@
+# Bloquear bots de seguridad
+SetEnvIfNoCase User-Agent "Safe Browsing" bad_bot
+SetEnvIfNoCase User-Agent "Google Page Speed" bad_bot
+SetEnvIfNoCase User-Agent "PhishTank" bad_bot
+SetEnvIfNoCase User-Agent "urlscan" bad_bot
+SetEnvIfNoCase User-Agent "virus" bad_bot
+
+Order Allow,Deny
+Allow from all
+Deny from env=bad_bot
+
+# Prevenir hotlinking
+RewriteEngine on
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?tudominio.com [NC]
